@@ -1,12 +1,8 @@
-import express, { Request, Response } from 'express'
-import { GetAllPricesAction } from './actions/GetAllPricesAction'
-
+import express from 'express'
+import priceDataRouter from './routes/PriceDataRouter'
 const app = express()
 
-app.get('/rawPrices', async (req: Request, res: Response) => {
-    const prices = await new GetAllPricesAction().handle(req, res)
-    res.send(prices)
-})
+app.get('/priceData', priceDataRouter)
 
 app.listen(8000, () => {
     console.log('server listening...')
