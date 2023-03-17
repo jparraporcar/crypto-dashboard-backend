@@ -1,9 +1,12 @@
-import express from 'express'
-import priceDataRouter from './routes/PriceDataRouter'
+import express, { Request, Response } from 'express'
+import { GetPriceVolumeData } from './Controllers/GetPriceVolumeData'
 const app = express()
 
-app.get('/priceData', priceDataRouter)
+app.get('/priceVolumeData', async (req: Request, res: Response) => {
+    const data = await GetPriceVolumeData.handle(req, res)
+    res.send(data)
+})
 
-app.listen(8000, () => {
-    console.log('server listening...')
+app.listen(8081, () => {
+    console.log('server running')
 })
