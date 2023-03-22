@@ -18,13 +18,13 @@ export class GetPriceVolumeData {
         let singleCandle: CandleChartResult[]
         for (const tickerName of allTickerNames) {
             singleCandle = await client.candles({
-                symbol: tickerName,
+                symbol: `${tickerName}`,
                 interval: `${query.interval}` as CandleChartInterval_LT,
                 limit: 1,
             })
             singleNamedCandle[`${tickerName}`] = singleCandle[0]
-            allNamedCandles.push(singleNamedCandle)
         }
+        allNamedCandles.push(singleNamedCandle)
         return allNamedCandles
     }
 }
