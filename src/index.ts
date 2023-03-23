@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { GetPriceVolumeData } from './Controllers/GetPriceVolumeData'
-import { TNamedKandle } from './types'
+import { TNamedCandles } from './types'
 const app = express()
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
@@ -10,7 +10,7 @@ var cors = require('cors')
 app.use(cors())
 
 app.get('/priceVolumeData', async (req: Request, res: Response) => {
-    let data: TNamedKandle[]
+    let data: TNamedCandles[]
     const today = new Date()
     const time =
         today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
