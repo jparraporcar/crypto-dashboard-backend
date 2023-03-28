@@ -1,18 +1,30 @@
 import { CandleChartInterval_LT, CandleChartResult } from 'binance-api-node'
-import { Request, Response } from 'express'
 import { client } from '../client'
 import { TNamedCandles } from '../types'
+import axios from 'axios'
+import { APIGatewayEvent } from 'aws-lambda'
 
 export class GetPriceVolumeData {
     public static async handle(
-        req: Request,
-        res: Response
+        event: APIGatewayEvent
     ): Promise<TNamedCandles[]> {
-        const { query } = req
-        const prices = await client.prices()
-        const allTickerNames = Object.keys(prices).filter((name) => {
-            return name.substring(name.length - 4) === `${query.stableCoinName}`
+        const { queryStringParameters: query } = event
+        if (!query) {
+            return []
+        }
+        const exchangeInfo = await axios.get(
+            'https://api.binance.com/api/v3/exchangeInfo'
+        )
+        const symbols = exchangeInfo.data.symbols.map((el: any) =>
+            el.symbol.toUpperCase()
+        )
+        const allTickerNames = symbols.filter((name: string) => {
+            return (
+                name.substring(name.length - 4) ===
+                `${query.stableCoinName!.toUpperCase()}`
+            )
         })
+
         const allNamedCandles: TNamedCandles[] = []
         const singleNamedCandle: TNamedCandles = {}
         let singleCandle: CandleChartResult[]
