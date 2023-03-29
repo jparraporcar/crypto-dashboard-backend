@@ -20,14 +20,21 @@ provider:
     region: ap-northeast-1
     timeout: 29
 functions:
-    api:
-        handler: src/api.handler
+    multiplePVData:
         timeout: 29
+        handler: src/api.multiplePVData
         events:
             - http:
                   path: /priceVolumeData
                   method: GET
-                  private: false
+                  cors: true
+    multiplePVDataWindow:
+        timeout: 29
+        handler: src/api.multiplePVDataWindow
+        events:
+            - http:
+                  path: /priceVolumeDataWindow
+                  method: GET
                   cors: true
 
 plugins:

@@ -1,42 +1,57 @@
 import { CandleChartInterval_LT, CandleChartResult } from 'binance-api-node'
 import { client } from '../client'
-import { TNamedCandles } from '../types'
-import axios from 'axios'
-import { APIGatewayEvent } from 'aws-lambda'
+import { TNamedCandles, TNamedCandlesT } from '../types'
+import {
+    APIGatewayEvent,
+    APIGatewayProxyEventQueryStringParameters,
+} from 'aws-lambda'
+import { fetchTickerNames } from '../utils'
+import { ClientError } from '../errorTypes'
 
 export class GetPriceVolumeData {
-    public static async handle(
-        event: APIGatewayEvent
-    ): Promise<TNamedCandles[]> {
-        const { queryStringParameters: query } = event
-        if (!query) {
-            return []
-        }
-        const exchangeInfo = await axios.get(
-            'https://api.binance.com/api/v3/exchangeInfo'
-        )
-        const symbols = exchangeInfo.data.symbols.map((el: any) =>
-            el.symbol.toUpperCase()
-        )
-        const allTickerNames = symbols.filter((name: string) => {
-            return (
-                name.substring(name.length - 4) ===
-                `${query.stableCoinName!.toUpperCase()}`
-            )
-        })
-
-        const allNamedCandles: TNamedCandles[] = []
-        const singleNamedCandle: TNamedCandles = {}
-        let singleCandle: CandleChartResult[]
+    public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {
+        const query = this.validate(event.queryStringParameters)
+        const allTickerNames = await fetchTickerNames(query)
+        const allSymbolsSingleNamedCandleArray: TNamedCandles[] = [] // all symbols candles at candle t0
+        const allSymbolsSingleNamedCandle: TNamedCandles = {}
+        let singleNamedCandle: CandleChartResult[]
         for (const tickerName of allTickerNames) {
-            singleCandle = await client.candles({
-                symbol: `${tickerName}`,
+            singleNamedCandle = await client.candles({
+                symbol: tickerName,
                 interval: `${query.interval}` as CandleChartInterval_LT,
                 limit: 1,
             })
-            singleNamedCandle[`${tickerName}`] = singleCandle[0]
+            allSymbolsSingleNamedCandle[tickerName] = singleNamedCandle[0]
         }
-        allNamedCandles.push(singleNamedCandle)
-        return allNamedCandles
+        allSymbolsSingleNamedCandleArray.push(allSymbolsSingleNamedCandle)
+        return allSymbolsSingleNamedCandleArray
+    }
+
+    public async window(event: APIGatewayEvent): Promise<TNamedCandlesT[]> {
+        const query = this.validate(event.queryStringParameters)
+        const allTickerNames = await fetchTickerNames(query)
+        const allSymbolsMultipleNamedCandlesArray: TNamedCandlesT[] = [] // all symbols candles from kandle t0 to candle t0 - tlimit (number of historical candles = limit)
+        const allSymbolsMultipleNamedCandles: TNamedCandlesT = {} //
+        let multipleNamedCandles: CandleChartResult[]
+        for (const tickerName of allTickerNames) {
+            multipleNamedCandles = await client.candles({
+                symbol: tickerName,
+                interval: query.interval as CandleChartInterval_LT,
+                limit: Number(query.windowLength),
+            })
+            allSymbolsMultipleNamedCandles[tickerName] = multipleNamedCandles
+        }
+        allSymbolsMultipleNamedCandlesArray.push(allSymbolsMultipleNamedCandles)
+        return allSymbolsMultipleNamedCandlesArray
+    }
+
+    public validate(query: APIGatewayProxyEventQueryStringParameters | null) {
+        if (!query) {
+            throw new ClientError(
+                'Client error',
+                'no query string parameters passed'
+            )
+        }
+        return query
     }
 }
