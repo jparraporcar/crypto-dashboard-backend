@@ -8,7 +8,7 @@ import {
 import { fetchTickerNames } from '../utils'
 import { ClientError } from '../errorTypes'
 
-export class GetPriceVolumeData {
+export class GetPVDataController {
     public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {
         const query = this.validate(event.queryStringParameters)
         const allTickerNames = await fetchTickerNames(query)

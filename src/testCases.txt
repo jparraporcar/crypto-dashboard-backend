@@ -1,4 +1,0 @@
-- User introduces all qs parameters but any/all of them are incorrect
-- User does not introduce qs parameters
-- An error comes from binance api due to too much request
-- An error is due to a problem with connectivity
