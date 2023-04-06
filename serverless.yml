@@ -34,12 +34,12 @@ functions:
                   method: GET
                   cors: true
 
-    listTables:
-        handler: src/api.listTables
+    registerUser:
+        handler: src/api.registerUser
         events:
             - http:
-                  path: /listTables
-                  method: GET
+                  path: /registerUser
+                  method: POST
                   cors: true
 
 plugins:

@@ -2,7 +2,7 @@ import { APIGatewayEvent, Context } from 'aws-lambda'
 import { GetPVDataController } from './Controllers/GetPVDataController'
 import { ClientError, ServerError } from './errorTypes'
 import { TNamedCandles, TNamedCandlesT } from './types'
-import { DynamoDbController } from './Controllers/DynamoDbController'
+import { DynamoDBController } from './Controllers/DynamoDbController'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -132,22 +132,26 @@ module.exports.multiplePVDataWindow = async (
     }
 }
 
-module.exports.listTables = async (
+module.exports.registerUser = async (
     event: APIGatewayEvent,
     context: Context
 ) => {
     try {
-        const result = await new DynamoDbController().listTables(event)
-        return {
-            statusCode: 500,
+        const res = await new DynamoDBController().registerUser(event)
+        const response = {
+            statusCode: 200,
             headers: corsHeaders,
-            body: result,
+            body: JSON.stringify(res),
         }
+        console.log(response)
+        return response
     } catch (err) {
-        return {
+        const response = {
             statusCode: 500,
             headers: corsHeaders,
             body: JSON.stringify(err),
         }
+        console.log(response)
+        return response
     }
 }
