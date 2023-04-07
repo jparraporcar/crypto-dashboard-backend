@@ -6,7 +6,7 @@ import {
     APIGatewayProxyEventQueryStringParameters,
 } from 'aws-lambda'
 import { fetchTickerNames } from '../utils'
-import { ClientError } from '../errorTypes'
+import { QueryStringError } from '../errors/ClientErrors'
 
 export class GetPVDataController {
     public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {
@@ -47,10 +47,7 @@ export class GetPVDataController {
 
     public validate(query: APIGatewayProxyEventQueryStringParameters | null) {
         if (!query) {
-            throw new ClientError(
-                'Client error',
-                'no query string parameters passed'
-            )
+            throw new QueryStringError()
         }
         return query
     }

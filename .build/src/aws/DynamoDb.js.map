@@ -1,0 +1,1 @@
+{"version":3,"file":"DynamoDb.js","sourceRoot":"","sources":["../../../src/aws/DynamoDb.ts"],"names":[],"mappings":";;;;;;AAAA,8DAAyD;AACzD,iDAAwB;AAEX,QAAA,MAAM,GAAG,IAAI,gCAAc,CAAC;IACrC,MAAM,EAAE,aAAG,CAAC,kBAAkB;CACjC,CAAC,CAAA"}

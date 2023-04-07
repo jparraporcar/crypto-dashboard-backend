@@ -1,17 +1,26 @@
 import { APIGatewayEvent } from 'aws-lambda'
 import { client } from '../aws/DynamoDb'
 import {
-    ListTablesCommandOutput,
     PutItemCommand,
+    GetItemCommand,
     PutItemCommandInput,
+    GetItemCommandInput,
+    PutItemCommandOutput,
+    GetItemCommandOutput,
 } from '@aws-sdk/client-dynamodb'
 import { TUserSchemaZod, userSchemaZod } from '../userSchemaZod'
-import { ClientError } from '../errorTypes'
+import { ExistingResource, ValidationError } from '../errors/ClientErrors'
 
 export class DynamoDBController {
-    public async registerUser(event: APIGatewayEvent): Promise<any> {
+    public async registerUser(
+        event: APIGatewayEvent
+    ): Promise<PutItemCommandOutput> {
         const body = this.validate(JSON.parse(event.body as string))
-
+        const itemExisting = await this.getUser(event)
+        if (itemExisting.Item) {
+            // logic for user to be able to request a new password will be necessary
+            throw new ExistingResource()
+        }
         const input: PutItemCommandInput = {
             TableName: 'users',
             Item: {
@@ -48,12 +57,25 @@ export class DynamoDBController {
             !zodRes.password ||
             !zodRes.passwordConf
         ) {
-            throw new ClientError(
-                'Validation error',
-                'Please refresh you page and introduce inputs again'
-            )
+            throw new ValidationError()
         } else {
             return zodRes
         }
+    }
+
+    public async getUser(
+        event: APIGatewayEvent
+    ): Promise<GetItemCommandOutput> {
+        const body = this.validate(JSON.parse(event.body as string))
+        const input: GetItemCommandInput = {
+            TableName: 'users',
+            Key: {
+                userName: { S: body.userName },
+                email: { S: body.email },
+            },
+        }
+        const command = new GetItemCommand(input)
+        const response = await client.send(command)
+        return response
     }
 }

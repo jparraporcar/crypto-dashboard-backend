@@ -1,8 +1,8 @@
 import { APIGatewayEvent, Context } from 'aws-lambda'
-import { GetPVDataController } from './Controllers/GetPVDataController'
-import { ClientError, ServerError } from './errorTypes'
+import { GetPVDataController } from './controllers/GetPVDataController'
 import { TNamedCandles, TNamedCandlesT } from './types'
-import { DynamoDBController } from './Controllers/DynamoDbController'
+import { DynamoDBController } from './controllers/DynamoDbController'
+import { BinanceError } from './errors/ServerErrors'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -28,14 +28,7 @@ module.exports.multiplePVData = async (
         console.log(response)
         return response
     } catch (err: any) {
-        console.log(err)
-        if (err instanceof ClientError) {
-            return {
-                statusCode: err.statusCode,
-                headers: corsHeaders,
-                body: JSON.stringify(err),
-            }
-        } else if (err.code === -1003) {
+        if (err.code === -1003) {
             setTimeout(async () => {
                 console.log('waiting 20s to send next request')
                 data = await new GetPVDataController().instant(event)
@@ -46,10 +39,11 @@ module.exports.multiplePVData = async (
                 }
             }, 20000)
         } else if (err.code === -1120) {
+            const binanceError = new BinanceError(-1120)
             return {
                 statusCode: 500,
                 headers: corsHeaders,
-                body: JSON.stringify(err),
+                body: JSON.stringify(binanceError),
             }
         } else if (err.code === 'ENOTFOUND') {
             setTimeout(async () => {
@@ -62,9 +56,11 @@ module.exports.multiplePVData = async (
                 }
             }, 300000)
         } else {
+            const unknownError = new Error('UNKNOWN_ERROR')
             return {
-                statusCode: 500,
-                body: 'unknown error',
+                statusCode: err.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(unknownError),
             }
         }
     }
@@ -94,13 +90,7 @@ module.exports.multiplePVDataWindow = async (
         }
     } catch (err: any) {
         console.log(err)
-        if (err instanceof ClientError) {
-            return {
-                statusCode: err.statusCode,
-                headers: corsHeaders,
-                body: JSON.stringify(err),
-            }
-        } else if (err.code === -1003) {
+        if (err.code === -1003) {
             setTimeout(async () => {
                 console.log('waiting 20s to send next request')
                 data = await new GetPVDataController().window(event)
@@ -111,22 +101,28 @@ module.exports.multiplePVDataWindow = async (
                 }
             }, 20000)
         } else if (err.code === -1120) {
+            const binanceError = new BinanceError(-1120)
             return {
                 statusCode: 500,
                 headers: corsHeaders,
-                body: JSON.stringify(err),
+                body: JSON.stringify(binanceError),
             }
+        } else if (err.code === 'ENOTFOUND') {
+            setTimeout(async () => {
+                console.log('waiting 5min to send next request')
+                data = await new GetPVDataController().window(event)
+                return {
+                    statusCode: 200,
+                    headers: corsHeaders,
+                    body: JSON.stringify(data),
+                }
+            }, 300000)
         } else {
-            if (err.code === 'ENOTFOUND') {
-                setTimeout(async () => {
-                    console.log('waiting 5min to send next request')
-                    data = await new GetPVDataController().window(event)
-                    return {
-                        statusCode: 200,
-                        headers: corsHeaders,
-                        body: JSON.stringify(data),
-                    }
-                }, 300000)
+            const unknownError = new Error('UNKNOWN_ERROR')
+            return {
+                statusCode: err.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(unknownError),
             }
         }
     }
