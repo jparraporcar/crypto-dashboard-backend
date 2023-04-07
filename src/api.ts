@@ -1,7 +1,7 @@
 import { APIGatewayEvent, Context } from 'aws-lambda'
-import { GetPVDataController } from './controllers/GetPVDataController'
+import { GetPVDataController } from './Controllers/GetPVDataController'
 import { TNamedCandles, TNamedCandlesT } from './types'
-import { DynamoDBController } from './controllers/DynamoDbController'
+import { DynamoDBController } from './Controllers/DynamoDbController'
 import { BinanceError } from './errors/ServerErrors'
 
 const corsHeaders = {
