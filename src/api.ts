@@ -137,6 +137,9 @@ module.exports.registerUser = async (
     context: Context
 ) => {
     try {
+        // first check if gmail already || userName already exists in the DB
+        // if user already exists then throw a ClientError 'user already exists
+        // otherwise create token and deliver to the user
         const res = await new DynamoDBController().registerUser(event)
         const response = {
             statusCode: 200,
