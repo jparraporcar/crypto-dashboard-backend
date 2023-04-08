@@ -10,17 +10,16 @@ import {
 } from '@aws-sdk/client-dynamodb'
 import { TUserSchemaZod, userSchemaZod } from '../userSchemaZod'
 import { ExistingResource, ValidationError } from '../errors/ClientErrors'
+import bcryptjs from 'bcryptjs'
 
 export class DynamoDBController {
     public async registerUser(
         event: APIGatewayEvent
     ): Promise<PutItemCommandOutput> {
         const body = this.validate(JSON.parse(event.body as string))
-        const itemExisting = await this.getUser(event)
-        if (itemExisting.Item) {
-            // logic for user to be able to request a new password will be necessary
-            throw new ExistingResource()
-        }
+        const hashedPassword = await bcryptjs.hash(body.password, 12)
+        const conditionExpression =
+            'attribute_not_exists(email) AND attribute_not_exists(userName)'
         const input: PutItemCommandInput = {
             TableName: 'users',
             Item: {
@@ -31,14 +30,16 @@ export class DynamoDBController {
                     S: body.email,
                 },
                 password: {
-                    S: body.password,
+                    S: hashedPassword,
                 },
                 passwordConf: {
-                    S: body.passwordConf,
+                    S: hashedPassword,
                 },
             },
             ReturnConsumedCapacity: 'TOTAL',
+            ConditionExpression: conditionExpression,
         }
+        console.log(input)
         const command = new PutItemCommand(input)
         const response = await client.send(command)
         return response
@@ -63,7 +64,7 @@ export class DynamoDBController {
         }
     }
 
-    public async getUser(
+    public async loginUser(
         event: APIGatewayEvent
     ): Promise<GetItemCommandOutput> {
         const body = this.validate(JSON.parse(event.body as string))
@@ -76,6 +77,7 @@ export class DynamoDBController {
         }
         const command = new GetItemCommand(input)
         const response = await client.send(command)
+
         return response
     }
 }
