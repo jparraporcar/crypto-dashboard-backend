@@ -9,7 +9,7 @@ import {
     GetItemCommandOutput,
 } from '@aws-sdk/client-dynamodb'
 import { TUserSchemaZod, userSchemaZod } from '../userSchemaZod'
-import { ExistingResource, ValidationError } from '../errors/ClientErrors'
+import { UnauthorizedError, ValidationError } from '../errors/ClientErrors'
 import bcryptjs from 'bcryptjs'
 
 export class DynamoDBController {
@@ -39,7 +39,7 @@ export class DynamoDBController {
             ReturnConsumedCapacity: 'TOTAL',
             ConditionExpression: conditionExpression,
         }
-        console.log(input)
+        console.log('input', input)
         const command = new PutItemCommand(input)
         const response = await client.send(command)
         return response
@@ -67,17 +67,26 @@ export class DynamoDBController {
     public async loginUser(
         event: APIGatewayEvent
     ): Promise<GetItemCommandOutput> {
-        const body = this.validate(JSON.parse(event.body as string))
+        const body = JSON.parse(event.body as string)
         const input: GetItemCommandInput = {
             TableName: 'users',
             Key: {
                 userName: { S: body.userName },
                 email: { S: body.email },
             },
+            AttributesToGet: ['userName', 'email', 'password'],
         }
         const command = new GetItemCommand(input)
         const response = await client.send(command)
-
+        if (response.Item) {
+            const isEqual = await bcryptjs.compare(
+                body.password,
+                response.Item.password.S as string // this line will not be reached if the user is not found
+            )
+            if (isEqual === false) {
+                throw new UnauthorizedError()
+            }
+        }
         return response
     }
 }

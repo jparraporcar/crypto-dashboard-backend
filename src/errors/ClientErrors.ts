@@ -25,4 +25,11 @@ export class QueryStringError {
     }
 }
 
-// DynamoDb query errors...
+export class UnauthorizedError {
+    public statusCode: number
+    public name: string
+    public constructor(public message?: string) {
+        this.statusCode = 401
+        this.name = 'UNAUTHORIZED_ERROR'
+    }
+}

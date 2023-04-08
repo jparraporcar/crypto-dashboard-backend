@@ -13,3 +13,12 @@ export class ConnectionError {
         this.statusCode = 404
     }
 }
+
+export class UnknownError {
+    public name: string
+    public statusCode: number
+    public constructor(public message?: string) {
+        this.name = 'UNKNOWN_ERROR'
+        this.statusCode = 500
+    }
+}

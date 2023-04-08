@@ -2,7 +2,8 @@ import { APIGatewayEvent, Context } from 'aws-lambda'
 import { GetPVDataController } from './Controllers/GetPVDataController'
 import { TNamedCandles, TNamedCandlesT } from './types'
 import { DynamoDBController } from './Controllers/DynamoDbController'
-import { BinanceError } from './errors/ServerErrors'
+import { BinanceError, UnknownError } from './errors/ServerErrors'
+import { ExistingResource } from './errors/ClientErrors'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -108,6 +109,7 @@ module.exports.multiplePVDataWindow = async (
                 body: JSON.stringify(binanceError),
             }
         } else if (err.code === 'ENOTFOUND') {
+            // Connection error thrown error
             setTimeout(async () => {
                 console.log('waiting 5min to send next request')
                 data = await new GetPVDataController().window(event)
@@ -133,26 +135,69 @@ module.exports.registerUser = async (
     context: Context
 ) => {
     try {
-        const res = await new DynamoDBController().registerUser(event)
+        await new DynamoDBController().registerUser(event)
         const response = {
             statusCode: 200,
             headers: corsHeaders,
-            body: JSON.stringify(res),
+            body: 'USER_REGISTERED',
         }
         console.log(response)
         return response
-    } catch (err) {
-        const response = {
-            statusCode: 500,
-            headers: corsHeaders,
-            body: JSON.stringify(err),
+    } catch (err: any) {
+        console.log('error', err)
+        if (err.name === 'ConditionalCheckFailedException') {
+            // DynamoDB thrown error
+            const newError = new ExistingResource()
+            const response = {
+                statusCode: newError.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(newError),
+            }
+            return response
+        } else {
+            const newError = new UnknownError()
+            const response = {
+                statusCode: newError.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(newError),
+            }
+            return response
         }
-        console.log(response)
-        return response
     }
 }
 
-// module.exports.loginUser = async (
-//     event: APIGatewayEvent,
-//     context: Context
-// ) => {}
+module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
+    try {
+        await new DynamoDBController().loginUser(event)
+        const response = {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: 'USER_LOGGEDIN',
+        }
+        console.log(response)
+        return response
+    } catch (err: any) {
+        if (err.name === 'ResourceNotFoundException') {
+            // DynamoDB thrown error
+            const newError = new ExistingResource('The user does not exist')
+            const response = {
+                statusCode: newError.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(newError),
+            }
+            console.log(response)
+            return response
+            // user trying to login with wrong credentials
+        } else if (err.name === 'UNAUTHORIZED_ERROR') {
+            const response = {
+                statusCode: err.statusCode,
+                headers: corsHeaders,
+                body: JSON.stringify(err),
+            }
+            console.log(response)
+            return response
+        }
+    }
+}
+
+// TODO: handle other typde of errors in the register/login workflow like connection errors...
