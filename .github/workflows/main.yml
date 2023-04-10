@@ -27,6 +27,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install Serverless CLI
+        run: npm install -g serverless
       - name: Create AWS SSM Parameters
         run: |
           ENDPOINTS=$(sls info | grep -E '^(GET|POST)\s+https://.*$' | awk '{print $2}')
