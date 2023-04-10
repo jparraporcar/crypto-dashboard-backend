@@ -78,7 +78,7 @@ resources:
         KeyPolicy:
           Version: '2012-10-17'
           Statement:
-            - Sid: Enable IAM User Permissions
+            - Sid: Enable IAM User to administrate the KMS key
               Effect: Allow
               Principal:
                 AWS:
@@ -86,14 +86,7 @@ resources:
               Action:
                 - 'kms:*'
               Resource: '*'
-            - Sid: Allow administration of the key
-              Effect: Allow
-              Principal:
-                AWS:
-                  - 'arn:aws:iam::006960460257:user/jordi-iam'
-              Action:
-                - 'kms:*'
-              Resource: '*'
+
         Tags:
           - Key: 'Environment'
             Value: 'Dev'
@@ -103,3 +96,15 @@ custom:
     httpPort: 4000
     websocketPort: 4001
     lambdaPort: 4002
+
+  hooks:
+    'deploy:finalize': |
+      ENDPOINTS=$(sls info | grep -E '^(GET|POST)\s+https://.*$' | awk '{print $2}')
+      for ENDPOINT in $ENDPOINTS; do
+        ENDPOINT_NAME=$(echo $ENDPOINT | awk -F'/' '{print $5}')
+        aws ssm put-parameter \
+          --name "/crypto-dashboard-backend/$ENDPOINT_NAME" \
+          --value "$ENDPOINT" \
+          --type "String" \
+          --overwrite
+      done
