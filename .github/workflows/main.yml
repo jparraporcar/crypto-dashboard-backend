@@ -31,6 +31,7 @@ jobs:
         run: npm install -g serverless
       - name: Create AWS SSM Parameters
         run: |
+          set -x
           ENDPOINTS=$(sls info | grep -E '^(GET|POST)\s+https://.*$' | awk '{print $2}')
           for ENDPOINT in $ENDPOINTS; do
             ENDPOINT_NAME=$(echo $ENDPOINT | awk -F'/' '{print $5}')
