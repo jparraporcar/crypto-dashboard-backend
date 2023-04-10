@@ -6,11 +6,11 @@ import {
     PutItemCommandInput,
     GetItemCommandInput,
     PutItemCommandOutput,
-    GetItemCommandOutput,
 } from '@aws-sdk/client-dynamodb'
 import { TUserSchemaZod, userSchemaZod } from '../userSchemaZod'
-import { UnauthorizedError, ValidationError } from '../errors/ClientErrors'
+import { UnAuthenticatedError, ValidationError } from '../errors/ClientErrors'
 import bcryptjs from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 export class DynamoDBController {
     public async registerUser(
@@ -64,9 +64,7 @@ export class DynamoDBController {
         }
     }
 
-    public async loginUser(
-        event: APIGatewayEvent
-    ): Promise<GetItemCommandOutput> {
+    public async loginUser(event: APIGatewayEvent): Promise<string> {
         const body = JSON.parse(event.body as string)
         const input: GetItemCommandInput = {
             TableName: 'users',
@@ -84,9 +82,17 @@ export class DynamoDBController {
                 response.Item.password.S as string // this line will not be reached if the user is not found
             )
             if (isEqual === false) {
-                throw new UnauthorizedError()
+                throw new UnAuthenticatedError()
             }
         }
-        return response
+        const token = jwt.sign(
+            {
+                userName: body.userName,
+                email: body.email,
+            },
+            'secretsecretsecret',
+            { expiresIn: '1h' }
+        )
+        return token
     }
 }

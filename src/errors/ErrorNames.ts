@@ -1,0 +1,8 @@
+export type ErrorName =
+    | 'VALIDATION_ERROR'
+    | 'EXISTING_RESOURCE_ERROR'
+    | 'QUERYSTRING_ERROR'
+    | 'AUTHENTICATION_ERROR'
+    | 'BINANCE_ERROR'
+    | 'ENOTFOUND'
+    | 'UNKNOWN_ERROR'

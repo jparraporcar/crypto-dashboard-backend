@@ -72,6 +72,33 @@ resources:
                       KeyType: RANGE
                 BillingMode: PAY_PER_REQUEST
 
+    MyKMSKey:
+        Type: AWS::KMS::Key
+        Properties:
+            Description: 'crypto-dashboard-key'
+            KeyPolicy:
+                Version: '2022-04-10'
+                Id: key-policy-1
+                Statement:
+                    - Sid: Enable IAM User Permissions
+                      Effect: Allow
+                      Principal:
+                          AWS:
+                              - 'arn:aws:iam::006960460257:user/jordi-iam'
+                      Action:
+                          - 'kms:*'
+                      Resource: '*'
+                    - Sid: Allow administration of the key
+                      Effect: Allow
+                      Principal:
+                          AWS:
+                              - 'arn:aws:iam::006960460257:user/jordi-iam'
+                      Action:
+                          - 'kms:*'
+                      Resource: '*'
+            Tags:
+                - Key: 'Environment'
+                  Value: 'Dev'
 custom:
     serverless-offline:
         httpPort: 4000

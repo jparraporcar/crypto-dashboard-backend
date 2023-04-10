@@ -29,6 +29,7 @@ module.exports.multiplePVData = async (
         console.log(response)
         return response
     } catch (err: any) {
+        console.log(err)
         if (err.code === -1003) {
             setTimeout(async () => {
                 console.log('waiting 20s to send next request')
@@ -84,11 +85,13 @@ module.exports.multiplePVDataWindow = async (
             'Payload size:',
             new TextEncoder().encode(JSON.stringify(data)).length
         )
-        return {
+        const response = {
             statusCode: 200,
             headers: corsHeaders,
             body: JSON.stringify(data),
         }
+        console.log(response)
+        return response
     } catch (err: any) {
         console.log(err)
         if (err.code === -1003) {
@@ -144,7 +147,7 @@ module.exports.registerUser = async (
         console.log(response)
         return response
     } catch (err: any) {
-        console.log('error', err)
+        console.log(err)
         if (err.name === 'ConditionalCheckFailedException') {
             // DynamoDB thrown error
             const newError = new ExistingResource()
@@ -168,15 +171,16 @@ module.exports.registerUser = async (
 
 module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
     try {
-        await new DynamoDBController().loginUser(event)
+        const token = await new DynamoDBController().loginUser(event)
         const response = {
             statusCode: 200,
             headers: corsHeaders,
-            body: 'USER_LOGGEDIN',
+            body: { message: 'USER_LOGGEDIN', token: token },
         }
         console.log(response)
         return response
     } catch (err: any) {
+        console.log(err)
         if (err.name === 'ResourceNotFoundException') {
             // DynamoDB thrown error
             const newError = new ExistingResource('The user does not exist')
@@ -188,7 +192,7 @@ module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
             console.log(response)
             return response
             // user trying to login with wrong credentials
-        } else if (err.name === 'UNAUTHORIZED_ERROR') {
+        } else if (err.name === 'AUTHENTICATION_ERROR') {
             const response = {
                 statusCode: err.statusCode,
                 headers: corsHeaders,
