@@ -1,106 +1,105 @@
 service: crypto-dashboard-backend
 frameworkVersion: '3'
 provider:
-    name: aws
-    runtime: nodejs16.x
-    stage: ${opt:stage, 'dev'}
-    region: ${opt:region, 'ap-northeast-1'}
-    timeout: 29
-    iamRoleStatements:
-        - Effect: Allow
-          Action:
-              - dynamodb:*
-          Resource: '*'
+  name: aws
+  runtime: nodejs16.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-northeast-1'}
+  timeout: 29
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: '*'
 
 functions:
-    multiplePVData:
-        memorySize: 2048
-        timeout: 29
-        handler: src/api.multiplePVData
-        events:
-            - http:
-                  path: /priceVolumeData
-                  method: GET
-                  cors: true
+  multiplePVData:
+    memorySize: 2048
+    timeout: 29
+    handler: src/api.multiplePVData
+    events:
+      - http:
+          path: /priceVolumeData
+          method: GET
+          cors: true
 
-    multiplePVDataWindow:
-        memorySize: 4096
-        timeout: 29
-        handler: src/api.multiplePVDataWindow
-        events:
-            - http:
-                  path: /priceVolumeDataWindow
-                  method: GET
-                  cors: true
+  multiplePVDataWindow:
+    memorySize: 4096
+    timeout: 29
+    handler: src/api.multiplePVDataWindow
+    events:
+      - http:
+          path: /priceVolumeDataWindow
+          method: GET
+          cors: true
 
-    registerUser:
-        handler: src/api.registerUser
-        events:
-            - http:
-                  path: /registerUser
-                  method: POST
-                  cors: true
+  registerUser:
+    handler: src/api.registerUser
+    events:
+      - http:
+          path: /registerUser
+          method: POST
+          cors: true
 
-    loginUser:
-        handler: src/api.loginUser
-        events:
-            - http:
-                  path: /loginUser
-                  method: POST
-                  cors: true
+  loginUser:
+    handler: src/api.loginUser
+    events:
+      - http:
+          path: /loginUser
+          method: POST
+          cors: true
 
 plugins:
-    - serverless-offline
-    - serverless-plugin-typescript
-    - serverless-event-body-option
+  - serverless-offline
+  - serverless-plugin-typescript
+  - serverless-event-body-option
 
 resources:
-    Resources:
-        users:
-            Type: AWS::DynamoDB::Table
-            Properties:
-                TableName: users
-                AttributeDefinitions:
-                    - AttributeName: userName
-                      AttributeType: S
-                    - AttributeName: email
-                      AttributeType: S
-                KeySchema:
-                    - AttributeName: email
-                      KeyType: HASH
-                    - AttributeName: userName
-                      KeyType: RANGE
-                BillingMode: PAY_PER_REQUEST
+  Resources:
+    users:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: users
+        AttributeDefinitions:
+          - AttributeName: userName
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+          - AttributeName: userName
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+    MyKMSKey:
+      Type: AWS::KMS::Key
+      Properties:
+        Description: 'crypto-dashboard-key'
+        KeyPolicy:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: Enable IAM User Permissions
+              Effect: Allow
+              Principal:
+                AWS:
+                  - 'arn:aws:iam::006960460257:user/jordi-iam'
+              Action:
+                - 'kms:*'
+              Resource: '*'
+            - Sid: Allow administration of the key
+              Effect: Allow
+              Principal:
+                AWS:
+                  - 'arn:aws:iam::006960460257:user/jordi-iam'
+              Action:
+                - 'kms:*'
+              Resource: '*'
+        Tags:
+          - Key: 'Environment'
+            Value: 'Dev'
 
-        MyKMSKey:
-            Type: AWS::KMS::Key
-            Properties:
-                Description: 'crypto-dashboard-key'
-                KeyPolicy:
-                    Version: '2022-04-10'
-                    Id: key-policy-1
-                    Statement:
-                        - Sid: Enable IAM User Permissions
-                          Effect: Allow
-                          Principal:
-                              AWS:
-                                  - 'arn:aws:iam::006960460257:user/jordi-iam'
-                          Action:
-                              - 'kms:*'
-                          Resource: '*'
-                        - Sid: Allow administration of the key
-                          Effect: Allow
-                          Principal:
-                              AWS:
-                                  - 'arn:aws:iam::006960460257:user/jordi-iam'
-                          Action:
-                              - 'kms:*'
-                          Resource: '*'
-                Tags:
-                    - Key: 'Environment'
-                      Value: 'Dev'
 custom:
-    serverless-offline:
-        httpPort: 4000
-        websocketPort: 4001
-        lambdaPort: 4002
+  serverless-offline:
+    httpPort: 4000
+    websocketPort: 4001
+    lambdaPort: 4002
