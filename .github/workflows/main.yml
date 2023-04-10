@@ -35,7 +35,8 @@ jobs:
           for ENDPOINT in $ENDPOINTS; do
             ENDPOINT_NAME=$(echo $ENDPOINT | awk -F'/' '{print $5}')
             aws ssm put-parameter \
-              --name "/my-service/$ENDPOINT_NAME" \
+              --region ap-northeast-1 \
+              --name "/crypto-dashboard-backend/$ENDPOINT_NAME" \
               --value "$ENDPOINT" \
               --type "String" \
               --overwrite
