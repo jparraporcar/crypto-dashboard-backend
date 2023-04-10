@@ -1,29 +1,43 @@
 name: Deploy main branch
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    deploy:
-        name: deploy
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                node-version: [16.x]
-        steps:
-            - uses: actions/checkout@v3
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - run: npm ci
-            - name: Install Plugin and Deploy
-              uses: serverless/github-action@v3.1
-              with:
-                  args: -c "serverless plugin install --name serverless-offline serverless-plugin-typescript serverless-event-body-option && serverless deploy"
-                  entrypoint: /bin/sh
-              env:
-                  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: Install Plugin and Deploy
+        uses: serverless/github-action@v3.1
+        with:
+          args: -c "serverless plugin install --name serverless-offline serverless-plugin-typescript serverless-event-body-option && serverless deploy"
+          entrypoint: /bin/sh
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Create AWS SSM Parameters
+        run: |
+          ENDPOINTS=$(sls info | grep -E '^(GET|POST)\s+https://.*$' | awk '{print $2}')
+          for ENDPOINT in $ENDPOINTS; do
+            ENDPOINT_NAME=$(echo $ENDPOINT | awk -F'/' '{print $5}')
+            aws ssm put-parameter \
+              --name "/my-service/$ENDPOINT_NAME" \
+              --value "$ENDPOINT" \
+              --type "String" \
+              --overwrite
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
