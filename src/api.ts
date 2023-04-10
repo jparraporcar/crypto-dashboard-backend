@@ -191,7 +191,6 @@ module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
             }
             console.log(response)
             return response
-            // user trying to login with wrong credentials
         } else if (err.name === 'AUTHENTICATION_ERROR') {
             const response = {
                 statusCode: err.statusCode,
