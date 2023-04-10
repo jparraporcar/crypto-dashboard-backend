@@ -27,21 +27,3 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: Install Serverless CLI
-        run: npm install -g serverless
-      - name: Create AWS SSM Parameters
-        run: |
-          set -x
-          ENDPOINTS=$(sls info | grep -E '^(GET|POST)\s+https://.*$' | awk '{print $2}')
-          for ENDPOINT in $ENDPOINTS; do
-            ENDPOINT_NAME=$(echo $ENDPOINT | awk -F'/' '{print $5}')
-            aws ssm put-parameter \
-              --region ap-northeast-1 \
-              --name "/crypto-dashboard-backend/$ENDPOINT_NAME" \
-              --value "$ENDPOINT" \
-              --type "String" \
-              --overwrite
-          done
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

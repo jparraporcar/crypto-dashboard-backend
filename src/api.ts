@@ -175,7 +175,7 @@ module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
         const response = {
             statusCode: 200,
             headers: corsHeaders,
-            body: { message: 'USER_LOGGEDIN', token: token },
+            body: JSON.stringify({ message: 'USER_LOGGEDIN', token: token }),
         }
         console.log(response)
         return response
