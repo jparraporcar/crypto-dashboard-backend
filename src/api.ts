@@ -1,6 +1,6 @@
 import { APIGatewayEvent, Context } from 'aws-lambda'
 import { GetPVDataController } from './Controllers/GetPVDataController'
-import { TNamedCandles, TNamedCandlesT } from './types'
+import { LambdaResponse, TNamedCandles, TNamedCandlesT } from './types'
 import { DynamoDBController } from './Controllers/DynamoDbController'
 import { BinanceError, UnknownError } from './errors/ServerErrors'
 import { ExistingResource } from './errors/ClientErrors'
@@ -203,4 +203,23 @@ module.exports.loginUser = async (event: APIGatewayEvent, context: Context) => {
     }
 }
 
-// TODO: handle other typde of errors in the register/login workflow like connection errors...
+module.exports.allSpotTickerNames = async (
+    event: APIGatewayEvent,
+    context: Context
+) => {
+    try {
+        const allSpotTickerNames =
+            await new GetPVDataController().allSpotTickerNames(event)
+        const response: LambdaResponse = {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify(allSpotTickerNames),
+        }
+        console.log(response)
+        return response
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+// TODO: handle other type of errors in the register/login workflow like connection errors...

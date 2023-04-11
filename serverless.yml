@@ -49,6 +49,14 @@ functions:
           method: POST
           cors: true
 
+  allSpotTickerNames:
+    handler: src/api.allSpotTickerNames
+    events:
+      - http:
+          path: /allSpotTickerNames
+          method: GET
+          cors: true
+
 plugins:
   - serverless-offline
   - serverless-plugin-typescript
@@ -71,25 +79,6 @@ resources:
           - AttributeName: userName
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-    MyKMSKey:
-      Type: AWS::KMS::Key
-      Properties:
-        Description: 'crypto-dashboard-key'
-        KeyPolicy:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: Enable IAM User to administrate the KMS key
-              Effect: Allow
-              Principal:
-                AWS:
-                  - 'arn:aws:iam::006960460257:user/jordi-iam'
-              Action:
-                - 'kms:*'
-              Resource: '*'
-
-        Tags:
-          - Key: 'Environment'
-            Value: 'Dev'
 
 custom:
   serverless-offline:

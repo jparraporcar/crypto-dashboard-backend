@@ -9,8 +9,17 @@ import { fetchTickerNames } from '../utils'
 import { QueryStringError } from '../errors/ClientErrors'
 
 export class GetPVDataController {
+    public async allSpotTickerNames(event: APIGatewayEvent): Promise<string[]> {
+        const query = this.validate(event.queryStringParameters) // only carrying one qs "stableCoinName" which is USDT by default
+        const allSpotTickerNames = await fetchTickerNames(query)
+        return allSpotTickerNames
+    }
+
     public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {
         const query = this.validate(event.queryStringParameters)
+        //TODO: include the querystring params that will come from frontend with customer custom options
+        // to retrieve only specific tokens so, it will no longer be necessary retrieve all tokens
+        // but only the ones requested by the customer -> allTickerNames ---> tickerNames
         const allTickerNames = await fetchTickerNames(query)
         const allSymbolsSingleNamedCandleArray: TNamedCandles[] = [] // all symbols candles at candle t0
         const allSymbolsSingleNamedCandle: TNamedCandles = {}
