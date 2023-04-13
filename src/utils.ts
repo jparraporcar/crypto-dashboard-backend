@@ -1,7 +1,7 @@
 import { APIGatewayProxyEventQueryStringParameters } from 'aws-lambda/trigger/api-gateway-proxy'
 import axios from 'axios'
 
-export const fetchTickerNames = async (
+export const fetchSymbolNames = async (
     query: APIGatewayProxyEventQueryStringParameters
 ) => {
     const exchangeInfo = await axios.get(

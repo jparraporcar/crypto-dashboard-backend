@@ -5,14 +5,14 @@ import {
     APIGatewayEvent,
     APIGatewayProxyEventQueryStringParameters,
 } from 'aws-lambda'
-import { fetchTickerNames } from '../utils'
+import { fetchSymbolNames } from '../utils'
 import { QueryStringError } from '../errors/ClientErrors'
 
 export class GetPVDataController {
-    public async allSpotTickerNames(event: APIGatewayEvent): Promise<string[]> {
+    public async allSpotSymbolNames(event: APIGatewayEvent): Promise<string[]> {
         const query = this.validate(event.queryStringParameters) // only carrying one qs "stableCoinName" which is USDT by default
-        const allSpotTickerNames = await fetchTickerNames(query)
-        const cleanNames = allSpotTickerNames.map((name: string) => {
+        const allSpotSymbolNames = await fetchSymbolNames(query)
+        const cleanNames = allSpotSymbolNames.map((name: string) => {
             return name.substring(0, name.length - 4)
         })
         return cleanNames
@@ -22,39 +22,39 @@ export class GetPVDataController {
         const query = this.validate(event.queryStringParameters)
         //TODO: include the querystring params that will come from frontend with customer custom options
         // to retrieve only specific tokens so, it will no longer be necessary retrieve all tokens
-        // but only the ones requested by the customer -> allTickerNames ---> tickerNames
-        const allTickerNames = await fetchTickerNames(query)
-        const allSymbolsSingleNamedCandleArray: TNamedCandles[] = [] // all symbols candles at candle t0
-        const allSymbolsSingleNamedCandle: TNamedCandles = {}
+        // but only the ones requested by the customer -> allSymbolNames ---> symbolNames
+        const symbolsNames = JSON.parse(query.symbols as string)
+        const symbolsSingleNamedCandleArray: TNamedCandles[] = [] // all symbols candles at candle t0
+        const symbolsSingleNamedCandle: TNamedCandles = {}
         let singleNamedCandle: CandleChartResult[]
-        for (const tickerName of allTickerNames) {
+        for (const symbolName of symbolsNames) {
             singleNamedCandle = await client.candles({
-                symbol: tickerName,
+                symbol: symbolName,
                 interval: `${query.interval}` as CandleChartInterval_LT,
                 limit: 1,
             })
-            allSymbolsSingleNamedCandle[tickerName] = singleNamedCandle[0]
+            symbolsSingleNamedCandle[symbolName] = singleNamedCandle[0]
         }
-        allSymbolsSingleNamedCandleArray.push(allSymbolsSingleNamedCandle)
-        return allSymbolsSingleNamedCandleArray
+        symbolsSingleNamedCandleArray.push(symbolsSingleNamedCandle)
+        return symbolsSingleNamedCandleArray
     }
 
     public async window(event: APIGatewayEvent): Promise<TNamedCandlesT[]> {
         const query = this.validate(event.queryStringParameters)
-        const allTickerNames = await fetchTickerNames(query)
-        const allSymbolsMultipleNamedCandlesArray: TNamedCandlesT[] = [] // all symbols candles from kandle t0 to candle t0 - tlimit (number of historical candles = limit)
-        const allSymbolsMultipleNamedCandles: TNamedCandlesT = {} //
+        const symbolsNames = JSON.parse(query.symbols as string)
+        const symbolsMultipleNamedCandlesArray: TNamedCandlesT[] = [] // all symbols candles from kandle t0 to candle t0 - tlimit (number of historical candles = limit)
+        const symbolsMultipleNamedCandles: TNamedCandlesT = {} //
         let multipleNamedCandles: CandleChartResult[]
-        for (const tickerName of allTickerNames) {
+        for (const symbolName of symbolsNames) {
             multipleNamedCandles = await client.candles({
-                symbol: tickerName,
+                symbol: symbolName,
                 interval: query.interval as CandleChartInterval_LT,
                 limit: Number(query.windowLength),
             })
-            allSymbolsMultipleNamedCandles[tickerName] = multipleNamedCandles
+            symbolsMultipleNamedCandles[symbolName] = multipleNamedCandles
         }
-        allSymbolsMultipleNamedCandlesArray.push(allSymbolsMultipleNamedCandles)
-        return allSymbolsMultipleNamedCandlesArray
+        symbolsMultipleNamedCandlesArray.push(symbolsMultipleNamedCandles)
+        return symbolsMultipleNamedCandlesArray
     }
 
     public validate(query: APIGatewayProxyEventQueryStringParameters | null) {

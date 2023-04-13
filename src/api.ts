@@ -211,7 +211,7 @@ module.exports.allSpotTickerNames = async (
 ) => {
     try {
         const allSpotTickerNames =
-            await new GetPVDataController().allSpotTickerNames(event)
+            await new GetPVDataController().allSpotSymbolNames(event)
         const response: LambdaResponse = {
             statusCode: 200,
             headers: corsHeaders,
