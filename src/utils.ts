@@ -16,8 +16,5 @@ export const fetchTickerNames = async (
             `${query.stableCoinName!.toUpperCase()}`
         )
     })
-    const cleanNames = allTickerNames.map((name: string) => {
-        return name.substring(0, name.length - 4)
-    })
-    return cleanNames
+    return allTickerNames
 }

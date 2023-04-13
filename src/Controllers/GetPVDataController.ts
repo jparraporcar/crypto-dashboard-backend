@@ -12,7 +12,10 @@ export class GetPVDataController {
     public async allSpotTickerNames(event: APIGatewayEvent): Promise<string[]> {
         const query = this.validate(event.queryStringParameters) // only carrying one qs "stableCoinName" which is USDT by default
         const allSpotTickerNames = await fetchTickerNames(query)
-        return allSpotTickerNames
+        const cleanNames = allSpotTickerNames.map((name: string) => {
+            return name.substring(0, name.length - 4)
+        })
+        return cleanNames
     }
 
     public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {

@@ -10,6 +10,7 @@ const corsHeaders = {
     'Access-Control-Allow-Credentials': true,
 }
 
+//TODO: handle qs errors
 module.exports.multiplePVData = async (
     event: APIGatewayEvent,
     context: Context
@@ -68,6 +69,7 @@ module.exports.multiplePVData = async (
     }
 }
 
+//TODO: handle qs errors
 module.exports.multiplePVDataWindow = async (
     event: APIGatewayEvent,
     context: Context
