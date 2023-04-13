@@ -33,14 +33,14 @@ module.exports.multiplePVData = async (
         console.log(err)
         if (err.code === -1003) {
             setTimeout(async () => {
-                console.log('waiting 20s to send next request')
+                console.log('waiting 40s to send next request')
                 data = await new GetPVDataController().instant(event)
                 return {
                     statusCode: 200,
                     headers: corsHeaders,
                     body: JSON.stringify(data),
                 }
-            }, 20000)
+            }, 40000)
         } else if (err.code === -1120) {
             const binanceError = new BinanceError(-1120)
             return {
