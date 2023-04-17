@@ -20,6 +20,7 @@ export class GetPVDataController {
 
     public async instant(event: APIGatewayEvent): Promise<TNamedCandles[]> {
         const query = this.validate(event.queryStringParameters)
+        console.log(query)
         //TODO: include the querystring params that will come from frontend with customer custom options
         // to retrieve only specific tokens so, it will no longer be necessary retrieve all tokens
         // but only the ones requested by the customer -> allSymbolNames ---> symbolNames
@@ -41,6 +42,7 @@ export class GetPVDataController {
 
     public async window(event: APIGatewayEvent): Promise<TNamedCandlesT[]> {
         const query = this.validate(event.queryStringParameters)
+        console.log(query)
         const symbolsNames = JSON.parse(query.symbols as string)
         const symbolsMultipleNamedCandlesArray: TNamedCandlesT[] = [] // all symbols candles from kandle t0 to candle t0 - tlimit (number of historical candles = limit)
         const symbolsMultipleNamedCandles: TNamedCandlesT = {} //

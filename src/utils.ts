@@ -7,9 +7,9 @@ export const fetchSymbolNames = async (
     const exchangeInfo = await axios.get(
         'https://api.binance.com/api/v3/exchangeInfo?permissions=SPOT'
     )
-    const symbols: string[] = exchangeInfo.data.symbols.map((el: any) =>
-        el.symbol.toUpperCase()
-    )
+    const symbols: string[] = exchangeInfo.data.symbols
+        .filter((symbolData: any) => symbolData.status === 'TRADING')
+        .map((el: any) => el.symbol.toUpperCase())
     const allTickerNames = symbols.filter((name: string) => {
         return (
             name.substring(name.length - 4) ===

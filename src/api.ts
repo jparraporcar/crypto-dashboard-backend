@@ -74,6 +74,7 @@ module.exports.multiplePVDataWindow = async (
     event: APIGatewayEvent,
     context: Context
 ) => {
+    console.log(event.body)
     let data: TNamedCandlesT[]
     const today = new Date()
     const time =
