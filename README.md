@@ -12,20 +12,23 @@
 
 ## Description
 
-This is the backend service for the Crypto-Dashboard application. It's built with serverless architecture on AWS, utilizing services like AWS Lambda, API Gateway, DynamoDB, and more to handle requests from the frontend application.
+The backend it's designed to work with the frontend code found in the repository at [jparraporcar/crypto-dashboard-frontend](https://github.com/jparraporcar/crypto-dashboard-frontend).
 
-This backend is designed to work with the frontend code found in the repository at [jparraporcar/crypto-dashboard-frontend](https://github.com/jparraporcar/crypto-dashboard-frontend).
 
-## Prerrequisites
+## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
+
 - You have installed the latest version of [Node.js and npm](https://nodejs.org/)
 - You have installed the [Serverless framework](https://www.serverless.com/framework/docs/getting-started/)
-- You have an AWS account with appropriate access rights
+- You have installed the [AWS CLI](https://aws.amazon.com/cli/)
+- You have an AWS account with appropriate access rights and a configured AWS profile
 
-## Installation
+## Setup
 
-To install crypto-dashboard-backend, follow these steps:
+### Installing dependencies
+
+To setup crypto-dashboard-backend, follow these steps:
 
 1. Clone the repository:
 
@@ -45,7 +48,24 @@ cd crypto-dash-board-backend
 npm install
 ```
 
-## Deployment
+## Development
+
+It is posible to run the following endpoints not related with DynamoDB without having to deploy the infrastructure first:
+
+1. `/priceVolumeData`: Retrieves OHLC data of the total amount of all the tokens requested for the current timeframe.
+2. `/priceVolumeDataWindow`: Retrieves OHLC data of all the tokens requested for the defined window size.
+3. `/allSpotTickerNames`: Retrieves the list of all tradable tokens in Binance Spot Market at the moment of the request.
+
+In order to to this you execute in the terminal:
+
+```
+serverless offline
+```
+
+You will be served with development endpoints. Use these development endpoints in the frontend if you want to test them within the frontend environment.
+
+
+### Deployment
 
 To deploy the backend, run the following command:
 
@@ -58,21 +78,21 @@ serverless deploy
 
 The `crypto-dashboard-backend` provides five endpoints:
 
-1. `/priceVolumeData`: Retrieves OHLC data of the total amount of all the tokens requested for the current candlestick.
-2. `/priceVolumeDataWindow`: Retrieves OHLC data of all the tokens requested for the historical period with the defined window size.
+1. `/priceVolumeData`: Retrieves OHLC data of the total amount of all the tokens requested for the current timeframe.
+2. `/priceVolumeDataWindow`: Retrieves OHLC data of all the tokens requested for the defined window size.
 3. `/registerUser`: Used for user registration.
 4. `/loginUser`: Used for user login.
-5. `/allSpotTickerNames`: Retrieves the list of all tradable tokens at the moment of the request.
+5. `/allSpotTickerNames`: Retrieves the list of all tradable tokens in Binance Spot Market at the moment of the request.
 
 ## Architecture
 
-This architecture is designed around the Serverless framework, using AWS Lambda functions for computation, Amazon API Gateway for HTTP request handling, and AWS CloudWatch for logging.
+The deployed architecture is designed around the Serverless framework, using AWS Lambda functions for computation, Amazon API Gateway for HTTP request handling, and AWS CloudWatch for logging.
 
 ![Infrastructure Diagram](./screenshots/diagram.jpg)
 
 ## Technologies
 
-The `crypto-dashboard-backend` utilizes various technologies and packages for its implementation:
+The `crypto-dashboard-backend` utilizes the following technologies and packages for its implementation:
 
 1. **Node.js** - An open-source, cross-platform, JavaScript runtime environment that executes JavaScript code outside of a web browser.
 2. **TypeScript** - An open-source language that builds on JavaScript by adding static type definitions.
