@@ -26,7 +26,7 @@ Before you begin, ensure you have met the following requirements:
 
 ## Setup
 
-### Installing dependencies
+### Installation
 
 To setup crypto-dashboard-backend, follow these steps:
 
@@ -48,23 +48,6 @@ cd crypto-dash-board-backend
 npm install
 ```
 
-## Development
-
-It is posible to run the following endpoints not related with DynamoDB without having to deploy the infrastructure first:
-
-1. `/priceVolumeData`: Retrieves OHLC data of the total amount of all the tokens requested for the current timeframe.
-2. `/priceVolumeDataWindow`: Retrieves OHLC data of all the tokens requested for the defined window size.
-3. `/allSpotTickerNames`: Retrieves the list of all tradable tokens in Binance Spot Market at the moment of the request.
-
-In order to to this you execute in the terminal:
-
-```
-serverless offline
-```
-
-You will be served with development endpoints. Use these development endpoints in the frontend if you want to test them within the frontend environment.
-
-
 ### Deployment
 
 To deploy the backend, run the following command:
@@ -73,6 +56,8 @@ To deploy the backend, run the following command:
 serverless deploy
 
 ```
+
+You will then obtain 5 endpoints to use in the frontend code repo.
 
 ## APIs
 
