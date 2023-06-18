@@ -20,7 +20,6 @@ This repository and its contents, including installation and deployment instruct
 
 The backend it's designed to work with the frontend code found in the repository at [jparraporcar/crypto-dashboard-frontend](https://github.com/jparraporcar/crypto-dashboard-frontend).
 
-
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
@@ -65,15 +64,17 @@ serverless deploy
 
 You will then obtain 5 endpoints to use in the frontend code repo.
 
-## APIs
+## Frontend integration
 
-The `crypto-dashboard-backend` provides five endpoints:
+From the deployment of the AWS services 5 endpoints are provided for lambda function invocation (all endpoints starting with 'https://...') and ending as below:
 
 1. `/priceVolumeData`: Retrieves OHLC data of the total amount of all the tokens requested for the current timeframe.
 2. `/priceVolumeDataWindow`: Retrieves OHLC data of all the tokens requested for the defined window size.
 3. `/registerUser`: Used for user registration.
 4. `/loginUser`: Used for user login.
 5. `/allSpotTickerNames`: Retrieves the list of all tradable tokens in Binance Spot Market at the moment of the request.
+
+These enpoints are introduced in the .env.development file in the root of the frontend code for the frontend development or in github as a secrets for the frontend deployment.
 
 ## Architecture
 
